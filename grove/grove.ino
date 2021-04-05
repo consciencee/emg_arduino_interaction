@@ -108,5 +108,10 @@ void loop()
         level_buf = level;
     }
     
+    // send value to serial
+    Serial.println(val);
+    // or you can send level:
+    // Serial.println(level);
+    
     delay(10);
 }
