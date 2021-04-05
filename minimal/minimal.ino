@@ -25,5 +25,7 @@ void loop()
 
     int val = analogRead(A0);                    // get Analog value
     
+    Serial.println(val);
+    
     delay(10);
 }
