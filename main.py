@@ -1,22 +1,22 @@
 import serial
 import re
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import pyqtgraph as pg
 import datetime as dt
+import numpy as np
 
 # Max amount of points displaying on the chart
-vals_limit = 50
+vals_limit = 500
 
 # Create figure for plotting
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-xs = []
-xs.extend(range(0, vals_limit))
-ys = [0] * vals_limit
+xs = np.arange(vals_limit)
+ys = np.zeros(vals_limit)
+pw = pg.plot()
+curve = pw.plot(xs, ys, title='EMG over time')
+pw.setLabel('left', 'Power')
 
 # Specify the port name
 # You should check this and change (if need) each time you reconnect the Arduino part
-port =  'COM3' # '/dev/ttyACM0'
+port =  'COM8' # '/dev/ttyACM0'
 
 # HC06 defaults to this value
 # You should not change this constant
@@ -39,7 +39,9 @@ def read_emg_once() :
 
 
 # This function is called periodically from FuncAnimation
-def animate(i, xs, ys):
+def update():
+
+    global ys, xs
 
     # Read EMG in each animate() call
     emg_signal = read_emg_once()
@@ -48,25 +50,25 @@ def animate(i, xs, ys):
 
     # Add x and y to lists
     #xs.append(dt.datetime.now().strftime('%H:%M:%S.%f'))
-    ys.append(int(emg_signal))
+    ys = np.append(ys, int(emg_signal))
 
     # Limit x and y lists to 20 items
     xs = xs[-vals_limit:]
     ys = ys[-vals_limit:]
 
     # Draw x and y lists
-    ax.clear()
-    ax.plot(xs, ys)
-    ax.set_ylim(bottom=0)
-    ax.set_ylim(top=500)
+    curve.setData(xs, ys)
 
-    # Format plot
-    plt.xticks(rotation=45, ha='right')
-    plt.subplots_adjust(bottom=0.30)
-    plt.title('EMG over time')
-    plt.ylabel('Power')
+# Set up calling update() function periodically
+# Reading emg is performed inside update()
+timer = pg.QtCore.QTimer()
+timer.timeout.connect(update)
+timer.setInterval(1)
+timer.start()
 
-# Set up plot to call animate() function periodically
-# Reading emg is performed inside animate()
-ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=100)
-plt.show()     
+# Following lines are required for pyqtgraph 
+# (besacuse it is based on Qt and we have to start QApplication to show any visual)
+if __name__ == '__main__':
+    import sys
+    if sys.flags.interactive != 1 or not hasattr(pg.QtCore, 'PYQT_VERSION'):
+        pg.QtGui.QApplication.exec_()
