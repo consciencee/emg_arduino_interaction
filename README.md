@@ -8,7 +8,7 @@
 
 ### На стороне Python
 
-(зависимости для данной части находятся в файле [requirements.txt](requirements.txt))
+(зависимости для данной части находятся в файле [requirements.txt](requirements.txt), установка: `pip install -r requirements.txt`)
 
 - [main.py](main.py) - подключается к последовательному порту, читает оттуда данные и выводит их на график.
 
